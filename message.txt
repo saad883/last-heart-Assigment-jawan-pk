@@ -1,0 +1,133 @@
+Today's Lecture:
+sonar mines rocks, model implications,
+5 models applied using arrays & compared by graph,
+deep learning.
+
+Note: when labels are available, eg colomn names, then we train model,
+it knows where are gates, DNA in which colomn,
+this called supervised learning.
+
+If model predicts itsel what is what, this is unsupervised learning.
+##code
+
+import pandas as pd
+
+data = pd.read_csv("sonar.all-data.csv")
+data
+
+data.shape
+
+pd.set_option('display.max_rows', 500)
+data.dtypes
+
+data.groupby('R').size()
+
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+arr = data.values
+X = arr[:,0:-1]
+Y = arr[:,-1]
+testing_size = 0.2
+print(Y)
+
+data['R']
+
+X = data.drop('R', axis=1)
+Y = data['R']
+print(Y)
+
+X_train, X_test, Y_train, Y_test = train_test_split(X,Y, test_size=testing_size)
+
+print(Y_test)
+
+DT = DecisionTreeClassifier()
+DT.fit(X_train, Y_train)
+Y_pred = DT.predict(X_test)
+# print(Y_pred)
+acc = accuracy_score(Y_test, Y_pred)*100
+print(f"Decision Tree Accuracy Score is: {acc}")
+
+RT = RandomForestClassifier()
+RT.fit(X_train, Y_train)
+Y_pred = RT.predict(X_test)
+acc = accuracy_score(Y_test, Y_pred)*100
+print(f"Random Forest Accuracy is: {acc}")
+
+models = []
+models.append(('DT',DecisionTreeClassifier()))
+models.append(('RT',RandomForestClassifier()))
+models.append(('KNN',KNeighborsClassifier()))
+models.append(('LR', LogisticRegression()))
+models.append(('GNB', GaussianNB()))
+print(models)
+
+names = []
+results = []
+
+for name, model in models:
+    obj = model
+    names.append(name)
+    obj.fit(X_train, Y_train)
+    Y_pred = obj.predict(X_test)
+    results.append(accuracy_score(Y_test, Y_pred)*100)
+    print(results)
+
+import matplotlib.pyplot as plt
+
+plt.scatter(names, results)
+
+Deep Learning:
+artificial neral networks are used, model designing for implications,
+rule designing,
+
+#start_code:
+
+import tensorflow as tf
+from tensorflow import keras
+from keras.models import Sequential
+from keras.layers import Dense
+
+# data['R'].replace(to_replace=['R','M'], value=[0,1], inplace=True)
+# data.head()
+X = data.drop('R', axis=1)
+Y = data.['R']
+X_train, X_test, Y_train, Y_test = train_test_split(X,Y, test_size=testing_size)
+
+ann_model = Sequential([
+    Dense(24, input_dim=61, activation='relu'),
+    Dense(12, activation='relu'),
+    Dense(8, activation='relu'),
+    Dense(1 activation='sigmoid')
+    
+])
+
+ann_model.compile(
+    optimizer = keras.optimizer.Adm(),
+    loss = 'binary_crossentropy',
+    metrics = ['accuracy']
+)
+
+ann_model.summary()
+
+##now we have to train the model
+
+ann_model.fit(X_train, Y_train, epochs=20)
+
+loss, acc =ann_model.evaluate(X_test, Y_test)
+
+print(loss)
+print(acc)
+names.append("ANN")
+
+results.append(acc*100)
+
+print(results)
+
+plt.scatter(names,results)
